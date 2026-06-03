@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: sentinel-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/snapshots:/app/snapshots
+      - ./backend/logs:/app/logs
+      - ./backend/face_db:/app/face_db
+    environment:
+      - ESP32_IP=${ESP32_IP:-192.168.1.100}
+      - ESP32_PORT=${ESP32_PORT:-81}
+    networks:
+      - sentinel-network
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: sentinel-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - sentinel-network
+    restart: unless-stopped
+
+networks:
+  sentinel-network:
+    driver: bridge
